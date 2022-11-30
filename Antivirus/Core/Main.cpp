@@ -1,8 +1,11 @@
 #include "Core.hpp"
 
 int main(int argc, char * argv[]) {
-	ENSURE(argc == 2, "bad args count");
+    if (daemonStart()) {
+    	return 1;
+    }
 
-	runObserver(argv[1]);
+    initObserver("/");
+	runObserver("/");
 	return 0;
 }

@@ -20,6 +20,17 @@
 #include <sys/stat.h>
 #include <sys/signalfd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <syslog.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <dirent.h>
 
 // defines
 #define ENSURE_NONNULL(X) if ((X) == NULL) {printf("Something is null in %s at %d line.\n", __FILE__, __LINE__); perror(""); exit(-1);}
@@ -28,24 +39,29 @@
 // constants
 #define FLUSH_TIME 1000
 #define OLD_LISTENING_TIME 10000
+#define PID_FILE_PATH "/run/my_daemon.pid"
 
-// system observer
+// syscalls
 void initObserver(const char * dir);
 void updateObserver();
+int daemonStart();
 
 // core
 void runObserver(const char * dir);
 
 // analyzer
 void allowKills();
+void stopKills();
 void reportAction(int pid, int fd);
 void parseOlds();
-void tryToPrintInfo();
 
 // utils
 char* get_program_name_from_pid(int pid, char *buffer, size_t buffer_size);
 long long getCurrentMillis();
 void fansyPrint(const char * mes, int count);
+
+// smart killer
+void orderKill(int target, bool child=false);
 
 // colors
 #define RED   "\x1B[31m"
