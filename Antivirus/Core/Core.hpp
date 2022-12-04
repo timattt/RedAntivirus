@@ -33,13 +33,14 @@
 #include <dirent.h>
 
 // defines
-#define ENSURE_NONNULL(X) if ((X) == NULL) {printf("Something is null in %s at %d line.\n", __FILE__, __LINE__); perror(""); exit(-1);}
-#define ENSURE(X, ERRMES) if (!(X)) {printf("Something went wrong: [%s] in %s at %d line.\n", ERRMES, __FILE__, __LINE__); perror(""); exit(-1);}
+#define WAIT while(1) {sleep(1);syslog(LOG_NOTICE | LOG_USER, "waiting...");}
+#define ENSURE_NONNULL(X) if ((X) == NULL) {/*printf(*/syslog(LOG_NOTICE | LOG_USER, "Something is null in %s at %d line.\n", __FILE__, __LINE__); perror("");WAIT exit(-1);}
+#define ENSURE(X, ERRMES) if (!(X)) {/*printf(*/syslog(LOG_NOTICE | LOG_USER, "Something went wrong: [%s] in %s at %d line.\n", ERRMES, __FILE__, __LINE__); perror("");WAIT exit(-1);}
 
 // constants
 #define FLUSH_TIME 1000
 #define OLD_LISTENING_TIME 10000
-#define PID_FILE_PATH "/run/my_daemon.pid"
+#define PID_FILE_PATH "/run/redAntivirus.pid"
 
 // syscalls
 void initObserver(const char * dir);
@@ -54,6 +55,7 @@ void allowKills();
 void stopKills();
 void reportAction(int pid, int fd);
 void parseOlds();
+void tryToFlush();
 
 // utils
 char* get_program_name_from_pid(int pid, char *buffer, size_t buffer_size);

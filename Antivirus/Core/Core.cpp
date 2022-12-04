@@ -19,9 +19,8 @@ void scanForFriends(const char *workDir) {
 }
 
 bool mayScan() {
-	printf("DO1\n");fflush(stdout);
 	int fd = open("~/Desktop/mayScan", O_RDONLY);
-	printf("DO2\n");fflush(stdout);
+
 	if (fd < 0) {
 		return 0;
 	}
@@ -36,7 +35,7 @@ bool mayScan() {
 	remove("~/Desktop/mayScan");
 	if (val == 123456) {
 		remove("~/Desktop/mayScan");
-		syslog(LOG_NOTICE | LOG_USER, "Found scanning flag");
+		//syslog(LOG_NOTICE | LOG_USER, "Found scanning flag");
 		return 1;
 	}
 	return 0;
@@ -46,14 +45,14 @@ bool mayScan() {
 // global functions
 //=======================================
 void runObserver(const char *workDir) {
-	syslog(LOG_NOTICE | LOG_USER, "Starting protection");
+	//syslog(LOG_NOTICE | LOG_USER, "Starting protection");
 
-	// phase 2 - protecting
 	while (1) {
 		updateObserver();
-		if (mayScan()) {
-			scanForFriends(workDir);
-		}
+		//if (mayScan()) {
+		//	scanForFriends(workDir);
+		//}
+		tryToFlush();
 	}
 }
 //=======================================
