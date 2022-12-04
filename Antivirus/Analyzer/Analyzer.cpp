@@ -44,11 +44,8 @@ void parseOlds() {
 void tryToFlush() {
 	long long curTime = getCurrentMillis();
 	if (curTime - lastFlush > FLUSH_TIME) {
-		printf("Total pids=%d\n", (int)frequency.size());fflush(stdout);
-		//FILE * fl = fopen("~/Desktop/log.txt", "w");
-		//char str[] = "go\n";
-		//fwrite(str , 1 , sizeof(str) , fl );
-		//fclose(fl);
+		printf("Total pids=%d\n", (int)frequency.size());
+		syslog(LOG_NOTICE, "Total pids=%d\n", (int)frequency.size());
 		frequency.clear();
 		lastFlush = curTime;
 	}

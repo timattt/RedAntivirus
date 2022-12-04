@@ -71,14 +71,14 @@ void handle_events(int fd, const char * dir) {
                     reportAction(metadata->pid, metadata->fd);
                     response.fd = metadata->fd;
                     response.response = FAN_ALLOW;
-                    write(fd, &response, sizeof(response));
+                    //write(fd, &response, sizeof(response));
                 }
 		        if (metadata->mask & FAN_OPEN_EXEC_PERM)
                 {
 		        	reportAction(metadata->pid, metadata->fd);
                     response.fd = metadata->fd;
                     response.response = FAN_ALLOW;
-                    write(fd, &response, sizeof(response));
+                   //write(fd, &response, sizeof(response));
                 }
                 /* Handle closing of writable file event. */
                 if (metadata->mask & FAN_CLOSE_WRITE)
@@ -131,7 +131,8 @@ void initObserver(const char * dir) {
 	workingDir = dir;
 
 	ENSURE((fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_PRE_CONTENT | FAN_NONBLOCK, O_RDONLY | O_LARGEFILE)) != -1, "fanotify init problems");
-	ENSURE(fanotify_mark(fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM | FAN_OPEN_EXEC_PERM | FAN_CLOSE_WRITE | FAN_CLOSE_NOWRITE, AT_FDCWD, dir) != -1, "marking root dir");
+	ENSURE(fanotify_mark(fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN | FAN_OPEN_EXEC | FAN_CLOSE_WRITE | FAN_CLOSE_NOWRITE, AT_FDCWD, dir) != -1, "marking root dir");
+	// OPEN and OPEN_EXEC - PERM removed
 
 	fanPoll.fd = fd;
 	fanPoll.events = POLLIN;
