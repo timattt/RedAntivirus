@@ -1,10 +1,11 @@
 #include "Core.hpp"
 
 int main(int argc, char * argv[]) {
-    if (daemonStart()) {
+	if (daemonStart()) {
     	return 1;
     }
-    initObserver("/");
+
+	initObserver("/");
 	runObserver("/");
 	return 0;
 }

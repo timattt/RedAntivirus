@@ -6,6 +6,7 @@ int get_process_parent_id(const pid_t pid) {
 	FILE* fp = fopen(buffer, "r");
 	if (fp) {
 		size_t size = fread(buffer, sizeof (char), sizeof (buffer), fp);
+		fclose(fp);
 		if (size > 0) {
 			// See: http://man7.org/linux/man-pages/man5/proc.5.html section /proc/[pid]/stat
 			strtok(buffer, " "); // (1) pid  %d
@@ -14,13 +15,33 @@ int get_process_parent_id(const pid_t pid) {
 			char * s_ppid = strtok(NULL, " "); // (4) ppid  %d
 			return atoi(s_ppid);
 		}
-		fclose(fp);
 	}
 
 	return -1;
 }
 
-void orderKill(int target, bool child) {
+int get_process_group_id(const pid_t pid) {
+	char buffer[BUFSIZ];
+	sprintf(buffer, "/proc/%d/stat", pid);
+	FILE* fp = fopen(buffer, "r");
+	if (fp) {
+		size_t size = fread(buffer, sizeof (char), sizeof (buffer), fp);
+		fclose(fp);
+		if (size > 0) {
+			// See: http://man7.org/linux/man-pages/man5/proc.5.html section /proc/[pid]/stat
+			strtok(buffer, " "); // (1) pid  %d
+			strtok(NULL, " "); // (2) comm  %s
+			strtok(NULL, " "); // (3) state  %c
+			strtok(NULL, " "); // (4) ppid  %d
+			char * gr = strtok(NULL, " ");
+			return atoi(gr);
+		}
+	}
+
+	return -1;
+}
+
+void orderKill(int target, std::set<int> & killedList) {
 	DIR * dir = opendir("/proc");
 
 	if (dir == NULL) {
@@ -38,16 +59,12 @@ void orderKill(int target, bool child) {
 		}
 
 		// kill children
-		if (get_process_parent_id(pid) == target) {
-			orderKill(pid);
+		if (pid != target && (get_process_parent_id(pid) == target || get_process_group_id(pid) == target)) {
+			orderKill(pid, killedList);
 		}
 	}
 
 	closedir(dir);
 	kill(target, SIGKILL);
-	if (child) {
-		syslog(LOG_CRIT | LOG_USER, "Дети врагов ОС подлежат ликвидации в обязательном порядке. pid=%d", target);
-	} else {
-		syslog(LOG_CRIT | LOG_USER, "Пустили в расход врага ОС. pid=%d", target);
-	}
+	killedList.insert(target);
 }

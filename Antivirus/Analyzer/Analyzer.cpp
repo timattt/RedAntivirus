@@ -1,18 +1,36 @@
 #include "../Core/Core.hpp"
-
+#include <bits/stdc++.h>
 // local variables
 //========================================
 std::map<int, int> frequency;
-std::set<int> olds;
-std::map<int, int> killed;
+std::set<int> friends;
+std::set<int> killed;
 long long lastFlush = 0;
-int maxAllowedAction = 1000;
+int maxAllowedAction = DEFAULT_MAX_ACTIONS;
 char mayKill = 0;
 //========================================
 
 
 // local functions
 //========================================
+void setToLog(const char * mes, std::set<int> & st) {
+	char buf[BUFSIZ] = {0};
+	char * cur = buf;
+	int i = 0;
+	int sz = st.size();
+	cur += sprintf(cur, "%s = [", mes);
+	for (int pid : st) {
+		cur += sprintf(cur, "%d", pid);
+		if (i + 1 < sz) {
+			cur += sprintf(cur, ", ");
+		}
+		i++;
+	}
+	cur += sprintf(cur, "]\n");
+
+	syslog(LOG_CRIT, "%s", buf);
+}
+
 void addPid(int pid) {
 	if (frequency.count(pid) == 0) {
 		frequency[pid] = 1;
@@ -21,33 +39,47 @@ void addPid(int pid) {
 	}
 }
 
+void resetMaxActions() {
+	maxAllowedAction = DEFAULT_MAX_ACTIONS;
+}
+
 void checkValid(int pid) {
-	if (mayKill && frequency[pid] > maxAllowedAction && olds.count(pid) == 0 && pid != getpid()) {
-		killed[pid] = frequency[pid];
-		//orderKill(pid);
+	if (mayKill && frequency[pid] > maxAllowedAction && friends.count(pid) == 0 && pid != getpid()) {
+		orderKill(pid, killed);
 	}
 }
 
-void parseOlds() {
-	olds.clear();
+void parseFriends() {
+	friends.clear();
+	maxAllowedAction = DEFAULT_MAX_ACTIONS;
 	for (std::pair<int, int> pr : frequency) {
 		int pid = pr.first;
 		maxAllowedAction = std::max(maxAllowedAction, pr.second);
-		olds.insert(pid);
-		//syslog(LOG_NOTICE | LOG_USER, "Found friend. pid=%d", pid);
+		friends.insert(pid);
 	}
+
+	syslog(LOG_CRIT, "New maximum operation count: %d", maxAllowedAction);
+	setToLog("Friends", friends);
 
 	frequency.clear();
 	lastFlush = getCurrentMillis();
 }
 
+void clearFriends() {
+	friends.clear();
+}
+
 void tryToFlush() {
 	long long curTime = getCurrentMillis();
 	if (curTime - lastFlush > FLUSH_TIME) {
-		printf("Total pids=%d\n", (int)frequency.size());
-		syslog(LOG_NOTICE, "Total pids=%d\n", (int)frequency.size());
 		frequency.clear();
 		lastFlush = curTime;
+
+		int sz = killed.size();
+		if (sz > 0) {
+			setToLog("Killed", killed);
+			killed.clear();
+		}
 	}
 }
 //========================================
@@ -59,7 +91,7 @@ void reportAction(int pid, int fd) {
 	if (pid != getpid()) {
 		addPid(pid);
 	}
-	//checkValid(pid);
+	checkValid(pid);
 }
 void allowKills() {
 	mayKill = 1;

@@ -41,6 +41,8 @@
 #define FLUSH_TIME 1000
 #define OLD_LISTENING_TIME 10000
 #define PID_FILE_PATH "/run/redAntivirus.pid"
+#define DEFAULT_MAX_ACTIONS 1000
+#define SCAN_TIME 1000
 
 // syscalls
 void initObserver(const char * dir);
@@ -54,7 +56,9 @@ void runObserver(const char * dir);
 void allowKills();
 void stopKills();
 void reportAction(int pid, int fd);
-void parseOlds();
+void parseFriends();
+void clearFriends();
+void resetMaxActions();
 void tryToFlush();
 
 // utils
@@ -63,7 +67,7 @@ long long getCurrentMillis();
 void fansyPrint(const char * mes, int count);
 
 // smart killer
-void orderKill(int target, bool child=false);
+void orderKill(int target, std::set<int> & killedList);
 
 // colors
 #define RED   "\x1B[31m"
