@@ -1,0 +1,16 @@
+[Unit]
+Description=RedAntivirus
+After=syslog.target
+
+[Service]
+Type=forking
+PIDFile=/run/redAntivirus.pid
+ExecStart=/home/timattt/Desktop/Antivirus/Antivirus/Debug/Antivirus
+ExecStop=/bin/kill "$MAINPID"
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+StartLimitInterval=0
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

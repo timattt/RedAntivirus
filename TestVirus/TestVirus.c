@@ -75,9 +75,20 @@ void fracSleep(float sec) {
 int main(int argc, char *argv[]) {
 	ENSURE(argc == 2, "Bad args count");
 
-	while (1) {
-		printf("Parsing [%s], My pid=[%d]\n", argv[1], getpid());
-		parseDirectory(argv[1]);
-		//fracSleep(0.02f);
+	int pid = fork();
+
+	if (pid != 0) {
+
+		while (1) {
+			printf("Parsing [%s], My pid=[%d]\n", argv[1], getpid());
+			parseDirectory(argv[1]);
+			//fracSleep(0.02f);
+		}
+
+	} else {
+		while (1) {
+			sleep(1);
+			printf("waiting! My pid=[%d]\n", getpid());
+		}
 	}
 }
