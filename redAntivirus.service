@@ -5,7 +5,7 @@ After=syslog.target
 [Service]
 Type=forking
 PIDFile=/run/redAntivirus.pid
-ExecStart=/home/timattt/Desktop/Antivirus/Antivirus/Debug/Antivirus
+ExecStart=/usr/local/bin/Antivirus
 ExecStop=/bin/kill "$MAINPID"
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
